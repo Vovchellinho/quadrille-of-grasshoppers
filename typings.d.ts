@@ -20,7 +20,10 @@ export type TBoardClass = {
 	getSize: () => number;
 	setPos: (x: number, y: number, grasshopper: TGrasshopperClass | null) => void;
 	getPos: (x: number, y: number) => TGrasshopperClass | null;
-	getNextPossiblePositions: () => TBoardClass[];
+	getNextPossiblePositions: () => {
+		positions: TBoardClass[];
+		valid: boolean;
+	};
 	getNullPositions: () => TPosition[];
 	draw: () => void;
 	setFinishPosition: () => void;
@@ -32,6 +35,7 @@ export type TBoard = Array<Array<TGrasshopperClass | null>>;
 export type TColor = 'white' | 'black';
 
 export type TBoardVariant = {
+	parentId: number | null;
 	id: number;
 	board: TBoardClass | null;
 	g: number;

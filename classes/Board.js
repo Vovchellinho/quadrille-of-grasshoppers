@@ -59,27 +59,135 @@ var Board = /** @class */ (function () {
     };
     // подсчет h(x) для доски
     Board.prototype.getH = function () {
-        var _a, _b, _c;
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var getDistance = function (i, j, color) {
+            var _a, _b;
+            var finishBoard = new Board();
+            finishBoard.setFinishPosition();
+            var possible = [];
+            for (var k = 0; k < _this.size; k++) {
+                for (var p = 0; p < _this.size; p++) {
+                    if (((_a = finishBoard.board[k][p]) === null || _a === void 0 ? void 0 : _a.color) === color && ((_b = _this.board[k][p]) === null || _b === void 0 ? void 0 : _b.color) !== color) {
+                        if ((color === 'white' && k >= i && p >= j) || (color === 'black' && k <= i && k <= j)) {
+                            possible.push({
+                                x: k,
+                                y: p,
+                                distance: Math.abs(k - i) + Math.abs(p - j)
+                            });
+                        }
+                    }
+                }
+            }
+            var distance = 1000;
+            var x = 0;
+            var y = 0;
+            if (possible.length === 0) {
+                distance = 0;
+            }
+            else {
+                for (var _i = 0, possible_1 = possible; _i < possible_1.length; _i++) {
+                    var pos = possible_1[_i];
+                    if (pos.distance < distance) {
+                        distance = pos.distance;
+                        x = pos.x;
+                        y = pos.y;
+                    }
+                }
+                ;
+            }
+            return distance;
+        };
         var h = 0;
         var finishBoard = new Board();
         finishBoard.setFinishPosition();
+        var countLimitWhiteV = 0;
+        var countLimitBlackV = 0;
+        var countLastWhite = 0;
+        var countPreLastWhite = 0;
+        var countPrePreLastWhite = 0;
+        var countLastBlack = 0;
+        var countPreLastBlack = 0;
+        var countFirstWhite = 0;
+        var countBlackLastLines = 0;
         for (var i = 0; i < this.size; i++) {
             for (var j = 0; j < this.size; j++) {
-                if (((_a = finishBoard.board[i][j]) === null || _a === void 0 ? void 0 : _a.color) !== ((_b = this.board[i][j]) === null || _b === void 0 ? void 0 : _b.color)) {
-                    if (this.board[i][j] === null) {
+                if (this.board[i][j] !== null && (((_a = this.board[i][j]) === null || _a === void 0 ? void 0 : _a.color) === 'white' || ((_b = this.board[i][j]) === null || _b === void 0 ? void 0 : _b.color) === 'black')) {
+                    if (((_c = this.board[i][j]) === null || _c === void 0 ? void 0 : _c.color) !== ((_d = finishBoard.board[i][j]) === null || _d === void 0 ? void 0 : _d.color)) {
+                        h += getDistance(i, j, this.board[i][j].color);
+                    }
+                    if (((_e = finishBoard.board[i][j]) === null || _e === void 0 ? void 0 : _e.color) !== ((_f = this.board[i][j]) === null || _f === void 0 ? void 0 : _f.color)) {
                         h += 1;
                     }
+                }
+                if (i > 2 && ((_g = this.board[i][j]) === null || _g === void 0 ? void 0 : _g.color) === 'white') {
+                    if (i == 3) {
+                        countPrePreLastWhite += 1;
+                    }
                     else {
-                        h += 2;
+                        countLimitWhiteV += 1;
                     }
-                    if (i == this.size - 1 || j == this.size - 1) {
-                        if (((_c = this.board[i][j]) === null || _c === void 0 ? void 0 : _c.color) === 'white') {
-                            h += 1000000;
-                        }
+                    if (i == 5) {
+                        countPreLastWhite += 1;
                     }
-                    h += 1;
+                    if (i == 6) {
+                        countLastWhite += 1;
+                    }
+                    if (countLastWhite > 4 || (countPreLastWhite > 4 && countLastWhite === 4)) {
+                        h += 1000000;
+                        return h;
+                    }
+                    if (countLimitWhiteV > 12) {
+                        h += 1000000;
+                        return h;
+                    }
+                    if (countLimitWhiteV === 12 && countPrePreLastWhite > 3) {
+                        h += 1000000;
+                        return h;
+                    }
+                }
+                else if (i === 0 && ((_h = this.board[i][j]) === null || _h === void 0 ? void 0 : _h.color) === 'white') {
+                    countFirstWhite += 1;
+                }
+                else if (i < 3 && ((_j = this.board[i][j]) === null || _j === void 0 ? void 0 : _j.color) === 'black') {
+                    countLimitBlackV += 1;
+                    if (i == 1) {
+                        countPreLastBlack += 1;
+                    }
+                    if (i == 0) {
+                        countLastBlack += 1;
+                    }
+                    if (countLastBlack > 4 || (countPreLastBlack > 4 && countLastBlack === 4)) {
+                        h += 1000000;
+                        return h;
+                    }
+                    if (countLimitBlackV > 12) {
+                        h += 1000000;
+                        return h;
+                    }
+                }
+                else if (i > 3 && ((_k = this.board[i][j]) === null || _k === void 0 ? void 0 : _k.color) === 'black') {
+                    countBlackLastLines += 1;
+                }
+                if (i == this.size - 1 || j == this.size - 1) {
+                    if (((_l = this.board[i][j]) === null || _l === void 0 ? void 0 : _l.color) === 'white') {
+                        h += 1000000;
+                        return h;
+                    }
                 }
             }
+        }
+        if (countFirstWhite < 3) {
+            h += 1000000;
+            return h;
+        }
+        if (countBlackLastLines < 9) {
+            h += 1000000;
+            return h;
+        }
+        var positions = this.getNextPossiblePositions();
+        if (h !== 0 && !positions.valid) {
+            h += 1000000;
         }
         return h;
     };
@@ -214,7 +322,26 @@ var Board = /** @class */ (function () {
                 }
             }
         });
-        return positions;
+        var notValid = 0;
+        positions.forEach(function (pos) {
+            var _a;
+            var h = 0;
+            for (var i = 0; i < pos.size; i++) {
+                for (var j = 0; j < pos.size; j++) {
+                    if (i == pos.size - 1 || j == pos.size - 1) {
+                        if (((_a = pos.board[i][j]) === null || _a === void 0 ? void 0 : _a.color) === 'white') {
+                            h += 1000000;
+                        }
+                    }
+                }
+            }
+            if (h >= 1000000)
+                notValid += 1;
+        });
+        return {
+            positions: positions,
+            valid: positions.length !== notValid
+        };
     };
     ;
     // получить все свободные клетки на доске
