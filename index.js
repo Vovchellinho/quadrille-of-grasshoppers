@@ -26,7 +26,7 @@ var findBestPosition = function (arr) {
             }
         }
         parentId = bestVariant.id;
-        // console.log(`g=${bestVariant.g},h=${bestVariant.h}`)
+        // console.log(`id=${bestVariant.id}, g=${bestVariant.g}, h=${bestVariant.h}`)
     }
     return bestVariant;
 };
@@ -78,7 +78,7 @@ currentBoard = newObj;
 var step = 0;
 var min = 100000;
 var minPos = null;
-while (step !== 500000) {
+while (step !== 10000) {
     step++;
     console.log(step);
     if (currentBoard && currentBoard.board) {
@@ -97,6 +97,7 @@ while (step !== 500000) {
             }
         });
         OPEN = OPEN.filter(function (state) { return state.id !== currentBoard.id && ((state.h + state.g) < 1000000); });
+        // console.log(OPEN)
         currentBoard = findBestPosition(OPEN);
         if (currentBoard) {
             if (currentBoard.h < min) {
@@ -117,6 +118,8 @@ if (minPos) {
     (_a = minPos.board) === null || _a === void 0 ? void 0 : _a.draw();
 }
 console.log('====================================');
+console.log("len");
+console.log(OPEN.length);
 while (parentId !== null) {
     var variant = CLOSE.filter(function (vari) { return vari.id === parentId; });
     result.push(variant[0]);

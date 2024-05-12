@@ -114,7 +114,7 @@ var Board = /** @class */ (function () {
             for (var j = 0; j < this.size; j++) {
                 if (this.board[i][j] !== null && (((_a = this.board[i][j]) === null || _a === void 0 ? void 0 : _a.color) === 'white' || ((_b = this.board[i][j]) === null || _b === void 0 ? void 0 : _b.color) === 'black')) {
                     if (((_c = this.board[i][j]) === null || _c === void 0 ? void 0 : _c.color) !== ((_d = finishBoard.board[i][j]) === null || _d === void 0 ? void 0 : _d.color)) {
-                        h += getDistance(i, j, this.board[i][j].color);
+                        h += getDistance(i, j, this.board[i][j].color) * 10;
                     }
                     if (((_e = finishBoard.board[i][j]) === null || _e === void 0 ? void 0 : _e.color) !== ((_f = this.board[i][j]) === null || _f === void 0 ? void 0 : _f.color)) {
                         h += 1;

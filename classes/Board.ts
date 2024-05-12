@@ -116,7 +116,7 @@ class Board {
 			for (let j = 0; j < this.size; j++) {
 				if (this.board[i][j] !== null && (this.board[i][j]?.color === 'white' || this.board[i][j]?.color === 'black')) {
 					if (this.board[i][j]?.color !== finishBoard.board[i][j]?.color) {
-						h += getDistance(i, j, this.board[i][j]!.color);
+						h += getDistance(i, j, this.board[i][j]!.color) * 10;
 					}
 					if (finishBoard.board[i][j]?.color !== this.board[i][j]?.color) {
 						h += 1;
