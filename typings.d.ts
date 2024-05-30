@@ -22,12 +22,13 @@ export type TBoardClass = {
 	getPos: (x: number, y: number) => TGrasshopperClass | null;
 	getNextPossiblePositions: () => {
 		positions: TBoardClass[];
-		valid: boolean;
 	};
 	getNullPositions: () => TPosition[];
 	draw: () => void;
+	draw_grasshopper: () => void;
 	setFinishPosition: () => void;
-	getH: () => number; 
+	getH: () => number;
+	getIdName: () => string;
 };
 
 export type TBoard = Array<Array<TGrasshopperClass | null>>;

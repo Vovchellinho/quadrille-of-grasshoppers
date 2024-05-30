@@ -1,6 +1,6 @@
 import Board from "./classes/Board";
-import Grasshopper from "./classes/Grasshopper";
-import type { TBoardClass, TBoardVariant } from "./typings";
+import { writeFile } from "fs";
+import type { TBoardVariant } from "./typings";
 
 const findBestPosition = (arr: TBoardVariant[]): TBoardVariant | null => {
 	let bestVariant: TBoardVariant | null = null;
@@ -30,33 +30,19 @@ const findBestPosition = (arr: TBoardVariant[]): TBoardVariant | null => {
 		}
 
 		parentId = bestVariant.id;
-		// console.log(`id=${bestVariant.id}, g=${bestVariant.g}, h=${bestVariant.h}`)
 	}
 
 	return bestVariant;
 }
 
 const board = new Board();
-const size = board.getSize();
 board.setStartPosition();
-board.draw();
-// console.log(board.getH())
-// console.log(board.getNextPossiblePositions())
-
-// console.log("@!#@")
-// board.setFinishPosition();
-// console.log(board.getH())
-
-// board.setPos(0, 3, new Grasshopper(0, 3, 'white'));
-// board.setPos(0, 4, new Grasshopper(0, 4, 'black'));
-// board.draw()
-// console.log(board.getNextPossiblePositions())
 
 let OPEN: TBoardVariant[] = [];
 let CLOSE: TBoardVariant[] = [];
 
 let hLocal = board.getH();
-console.log(hLocal)
+
 let currentBoard: TBoardVariant | null;
 let id = 0;
 
@@ -69,32 +55,15 @@ const newObj: TBoardVariant = {
 	g: 0
 };
 
-// console.log("____")
-// board.setFinishPosition();
-// board.setPos(0, 3,  new Grasshopper(0,3, 'white'));
-// board.setPos(0, 4,  new Grasshopper(0,3, 'black'));
-// board.setPos(3, 2, null);
-// board.setPos(3,3, new Grasshopper(3,3, 'black'))
-// board.draw()
-// console.log(board.getH())
-
-// const poses = board.getNextPossiblePositions().positions;
-
-// for (const pos of poses) {
-// 	pos.draw()
-	
-// 	console.log(pos.getH())
-// 	console.log("@!#!")
-// }
-
 let parentId: number | null = 0;
 OPEN.push(newObj);
 CLOSE.push(newObj);
 currentBoard = newObj;
+const history = new Set();
+history.add(currentBoard.board!.getIdName());
 let step = 0;
-let min = 100000;
-let minPos: TBoardVariant | null = null;
-while (step !== 10000) {
+
+while (hLocal !== 0) {
 	step++;
 	console.log(step)
 	if (currentBoard && currentBoard.board) {
@@ -102,25 +71,21 @@ while (step !== 10000) {
 		newBoards.forEach((newBoard) => {
 			id += 1;
 			const h = newBoard.getH();
-				if (h < 1000000) {
-					OPEN.push({
-						parentId: parentId,
-						id: id,
-						board: newBoard,
-						h: h,
-						g: currentBoard!.g + 1
-					});
-				}
+			const name = newBoard.getIdName();
+			if (h < 1000000 && !history.has(name)) {
+				history.add(name);
+				OPEN.push({
+					parentId: parentId,
+					id: id,
+					board: newBoard,
+					h: h,
+					g: currentBoard!.g + 1
+				});
+			}
 		});
 		OPEN = OPEN.filter((state) => state.id !== currentBoard!.id && ((state.h + state.g) < 1000000));
-		// console.log(OPEN)
 		currentBoard = findBestPosition(OPEN);
 		if (currentBoard) {
-			
-			if (currentBoard.h < min) {
-				min = currentBoard.h;
-				minPos = currentBoard;
-			}
 			CLOSE.push(currentBoard);
 			hLocal = currentBoard.h;
 		}
@@ -129,15 +94,6 @@ while (step !== 10000) {
 		}
 	}
 }
-console.log('====================================');
-console.log(min)
-if (minPos) {
-	minPos.board?.draw();
-}
-console.log('====================================');
-
-console.log("len")
-console.log(OPEN.length)
 
 while (parentId !== null) {
 	const variant =  CLOSE.filter((vari) => vari.id === parentId);
@@ -145,9 +101,28 @@ while (parentId !== null) {
 	parentId = variant[0].parentId;
 }
 
-// for (const item of result.reverse()) {
-// 	item.board?.draw();
-// 	console.log("!!!!!")
-// }
+const resultString = [];
+for (const item of result.reverse()) {
+	resultString.push(`g: ${item.g}`);
+	for (let i = 0; i < item.board!.getSize(); i++) {
+		let strBoard = '';
+		for (let j = 0; j < item.board!.getSize(); j++) {
+			const color = item.board?.getPos(i, j)?.color;
+			strBoard +=  color ? (color === 'black' ? 'b' : 'w') : 0;
+			strBoard += ' ';
+		}
+		resultString.push(strBoard);
+	}
+	resultString.push(' ');
+}
 
-// console.log(result.length)
+const saveToFile = async (filePath: string, dataToWrite: string) => {
+	await writeFile(filePath, dataToWrite, err => console.error(err));
+}
+
+if (hLocal == 0) {
+	console.log("Success");
+} else {
+	console.log("Failed");
+}
+saveToFile('data.txt', resultString.join('\n'));

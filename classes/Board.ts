@@ -1,7 +1,6 @@
 import Grasshopper from "./Grasshopper";
 import type { 
-	TBoard, 
-	TBoardClass, 
+	TBoard,
 	TColor, 
 	TGrasshopperClass, 
 	TPosition
@@ -49,17 +48,19 @@ class Board {
 		for(let i = 0; i < this.size - 1; i++) {
 			for(let j = 0; j < this.size - 1; j++) {
 				let grasshopper: null | TGrasshopperClass = null;
-				if (j < 4) {
-					grasshopper = new Grasshopper(i, j, 'black');
-				} else if (j < this.size - 1) {
-					grasshopper = new Grasshopper(i, j, 'white');
-				};
+				if (j < 3) {
+					grasshopper = new Grasshopper(i, j + 4, 'black');
+				} else if (j > 3 && j < this.size - 1) {
+					grasshopper = new Grasshopper(i, j - 4, 'white');
+				} else if (j === 3) {
+					grasshopper = new Grasshopper(i + 4, j, 'black');
+				}
 				this.setPos(i, j, grasshopper);
 			}
 		}
 		this.setPos(3, 3, null);
 		for (let i = 4; i < this.size - 1; i++) {
-			this.setPos(i, 3, new Grasshopper(i, 3, 'white'))
+			this.setPos(i, 3, new Grasshopper(i - 4, 3, 'white'))
 		}
 	}
 
@@ -97,7 +98,7 @@ class Board {
 				};
 			}
 			return distance;
-		};
+		}
 
 		let h = 0;
 		const finishBoard = new Board();
@@ -116,7 +117,7 @@ class Board {
 			for (let j = 0; j < this.size; j++) {
 				if (this.board[i][j] !== null && (this.board[i][j]?.color === 'white' || this.board[i][j]?.color === 'black')) {
 					if (this.board[i][j]?.color !== finishBoard.board[i][j]?.color) {
-						h += getDistance(i, j, this.board[i][j]!.color) * 10;
+						h += getDistance(i, j, this.board[i][j]!.color);
 					}
 					if (finishBoard.board[i][j]?.color !== this.board[i][j]?.color) {
 						h += 1;
@@ -183,10 +184,7 @@ class Board {
 			h += 1000000;
 			return h;
 		}
-		const positions = this.getNextPossiblePositions();
-		if (h !== 0 && !positions.valid) {
-			h += 1000000;
-		}
+
 		return h;
 	}
 
@@ -209,6 +207,18 @@ class Board {
 		return this.size;
 	};
 
+	// id for set
+	getIdName() {
+		let name = '';
+		for (let i = 0; i < this.size; i++) {
+			for (let j = 0; j < this.size; j++) {
+				const grasshopper = this.getPos(i, j);
+				name += i + j + (grasshopper ? grasshopper?.color : 'o');
+			}
+		}
+		return name;
+	}
+
 	// установка grasshopper | null на позицию x,y
 	setPos(x: number, y: number, grasshopper: TGrasshopperClass | null) {
 		this.board[x][y] = grasshopper;
@@ -228,50 +238,52 @@ class Board {
 
 		const nullPositions = this.getNullPositions();
 		nullPositions.forEach((field) => {
-			// верх от пустого
-			if (checkPosition(field.x - 1, field.y)) {
-				const grasshopper = this.getPos(field.x - 1, field.y);
-				if (grasshopper && grasshopper.color === 'white') {
-					const newBoard = new Board();
-					newBoard.copy(this.board);
-					newBoard.setPos(field.x - 1, field.y, null);
-					newBoard.setPos(field.x, field.y, grasshopper);
-					positions.push(newBoard);
-				} else if (grasshopper && grasshopper.color === 'black') {
-					if (checkPosition(field.x - 2, field.y)) {
-						const grasshopper = this.getPos(field.x - 2, field.y);
-						if (grasshopper && grasshopper.color === 'white') {
-							const newBoard = new Board();
-							newBoard.copy(this.board);
-							newBoard.setPos(field.x - 2, field.y, null);
-							newBoard.setPos(field.x, field.y, grasshopper);
-							positions.push(newBoard);
+			// if (field.y === 3) {
+				// верх от пустого
+				if (checkPosition(field.x - 1, field.y)) {
+					const grasshopper = this.getPos(field.x - 1, field.y);
+					if (grasshopper && grasshopper.color === 'white') {
+						const newBoard = new Board();
+						newBoard.copy(this.board);
+						newBoard.setPos(field.x - 1, field.y, null);
+						newBoard.setPos(field.x, field.y, grasshopper);
+						positions.push(newBoard);
+					} else if (grasshopper && grasshopper.color === 'black') {
+						if (checkPosition(field.x - 2, field.y)) {
+							const grasshopper = this.getPos(field.x - 2, field.y);
+							if (grasshopper && grasshopper.color === 'white') {
+								const newBoard = new Board();
+								newBoard.copy(this.board);
+								newBoard.setPos(field.x - 2, field.y, null);
+								newBoard.setPos(field.x, field.y, grasshopper);
+								positions.push(newBoard);
+							}
 						}
 					}
 				}
-			}
-			// низ от пустого
-			if (checkPosition(field.x + 1, field.y)) {
-				const grasshopper = this.getPos(field.x + 1, field.y);
-				if (grasshopper && grasshopper.color === 'black') {
-					const newBoard = new Board();
-					newBoard.copy(this.board);
-					newBoard.setPos(field.x + 1, field.y, null);
-					newBoard.setPos(field.x, field.y, grasshopper);
-					positions.push(newBoard);
-				} else if (grasshopper && grasshopper.color === 'white') {
-					if (checkPosition(field.x + 2, field.y)) {
-						const grasshopper = this.getPos(field.x + 2, field.y);
-						if (grasshopper && grasshopper.color === 'black') {
-							const newBoard = new Board();
-							newBoard.copy(this.board);
-							newBoard.setPos(field.x + 2, field.y, null);
-							newBoard.setPos(field.x, field.y, grasshopper);
-							positions.push(newBoard);
+				// низ от пустого
+				if (checkPosition(field.x + 1, field.y)) {
+					const grasshopper = this.getPos(field.x + 1, field.y);
+					if (grasshopper && grasshopper.color === 'black') {
+						const newBoard = new Board();
+						newBoard.copy(this.board);
+						newBoard.setPos(field.x + 1, field.y, null);
+						newBoard.setPos(field.x, field.y, grasshopper);
+						positions.push(newBoard);
+					} else if (grasshopper && grasshopper.color === 'white') {
+						if (checkPosition(field.x + 2, field.y)) {
+							const grasshopper = this.getPos(field.x + 2, field.y);
+							if (grasshopper && grasshopper.color === 'black') {
+								const newBoard = new Board();
+								newBoard.copy(this.board);
+								newBoard.setPos(field.x + 2, field.y, null);
+								newBoard.setPos(field.x, field.y, grasshopper);
+								positions.push(newBoard);
+							}
 						}
 					}
 				}
-			}
+			// }
 			// слева от пустого
 			if (checkPosition(field.x, field.y - 1)) {
 				const grasshopper = this.getPos(field.x, field.y - 1);
@@ -317,7 +329,7 @@ class Board {
 				}
 			}
 		})
-		let notValid = 0;
+		const filter: boolean[] = [];
 		positions.forEach((pos) => {
 			let h = 0;
 			for (let i = 0; i < pos.size; i++) {
@@ -325,16 +337,25 @@ class Board {
 					if (i == pos.size - 1 || j == pos.size - 1) {
 						if (pos.board[i][j]?.color === 'white') {
 							h += 1000000;
+							break;
 						}
 					}
 				}
 			}
-			if (h >= 1000000) notValid += 1;
+			if (h >= 1000000) {
+				filter.push(false)
+			} else {
+				filter.push(true)
+			}
 		})
 
+		const result = positions.filter((v, i) => {
+			if (filter[i] === true) {
+				return v;
+			}
+		});
 		return { 
-			positions,
-			valid: positions.length !== notValid
+			positions: result
 		};
 	};
 
@@ -377,8 +398,28 @@ class Board {
 		}
 		console.log(result.join('\n'));
 	};
+
+	draw_grasshopper() {
+		const result: string[] = [];
+		for (let i = 0; i < this.size; i++) {
+			let raw = '';
+			for (let j = 0; j < this.size; j++) {
+				const grasshopper = this.getPos(i, j);
+				if (grasshopper === null) {
+					raw += '0';
+				} else {
+					raw += `(${grasshopper.x}; ${grasshopper.y})`;
+				}
+				raw += ' ';
+			};
+			result.push(raw);
+		}
+		console.log(result.join('\n'));
+	};
 };
 
 export default Board;
+
+
 
 
