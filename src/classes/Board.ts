@@ -4,7 +4,7 @@ import type {
 	TColor, 
 	TGrasshopperClass, 
 	TPosition
-} from "../typings";
+} from "../../typings";
 
 class Board {
 	board: TBoard = [[]];

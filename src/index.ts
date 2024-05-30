@@ -1,6 +1,6 @@
 import Board from "./classes/Board";
 import { writeFile } from "fs";
-import type { TBoardVariant } from "./typings";
+import type { TBoardVariant } from "../typings";
 
 const findBestPosition = (arr: TBoardVariant[]): TBoardVariant | null => {
 	let bestVariant: TBoardVariant | null = null;

@@ -1,4 +1,4 @@
-import type { TBoard, TColor } from "../typings";
+import type { TColor } from "../../typings";
 
 class Grasshopper {
 	x: number;

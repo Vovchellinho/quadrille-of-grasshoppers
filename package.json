@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "tsc index.ts && node index.js"
+    "start": "tsc && node ./build/index.js"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
